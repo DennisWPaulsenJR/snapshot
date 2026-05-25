@@ -335,3 +335,18 @@ cx should build the safe foundation:
 - audit/retention model
 
 After implementation, cx should run available checks and report using the agent update format above.
+
+---
+
+# Agent activity
+
+agent: cdx
+date: 2026-05-24
+branch: main
+task: Flutter MVP foundation
+files changed: lib/, test/widget_test.dart
+summary: Added feature-first Flutter app shell with Home, Emergency Mode, Snapshot History, Devices, and Settings pages; created core models and mock/local service abstractions for signal snapshots, BLE, Wi-Fi, location, retention, and audit logging.
+checks run: dart format; flutter analyze; flutter test; flutter build web; temporary flutter web-server smoke check
+results: Analyzer passed, widget test passed, web build passed, local web server responded on localhost.
+risks: Snapshot persistence is in-memory only; sensor data is mock-only; no auth, backend, real permissions, or encrypted storage yet.
+next: Add local structured persistence and a QA/export view for snapshot data.
