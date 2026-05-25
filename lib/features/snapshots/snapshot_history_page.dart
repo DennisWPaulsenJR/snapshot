@@ -85,7 +85,7 @@ class _SnapshotCard extends StatelessWidget {
             Text('Created: ${snapshot.createdAt.toLocal()}'),
             Text('Retention expires: ${snapshot.retentionExpiresAt.toLocal()}'),
             Text('BLE observations: ${snapshot.bleObservations.length}'),
-            if (wifi != null) Text('Wi-Fi context: ${wifi.hashedNetworkId}'),
+            if (wifi != null) Text('Wi-Fi context hash: ${wifi.idHash}'),
             if (location != null)
               Text(
                 'Location: ${location.latitude}, ${location.longitude} (+/- ${location.accuracyMeters}m)',

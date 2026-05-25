@@ -24,6 +24,15 @@ class SettingsPage extends StatelessWidget {
           SizedBox(height: 12),
           Card(
             child: ListTile(
+              leading: Icon(Icons.security),
+              title: Text('Misuse risk model'),
+              subtitle: Text(
+                'The system materially reduces misuse risk while preserving emergency evidentiary value.',
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
               leading: Icon(Icons.timer),
               title: Text('Default retention'),
               subtitle: Text('Normal mock snapshots expire after 72 hours.'),
@@ -34,7 +43,7 @@ class SettingsPage extends StatelessWidget {
               leading: Icon(Icons.privacy_tip),
               title: Text('Identifier handling'),
               subtitle: Text(
-                'Mock BLE and Wi-Fi identifiers are hashed labels. Raw MAC storage is out of scope.',
+                'Mock BLE and Wi-Fi identifiers are represented as salted session hashes. Protected raw fields are internal only and never displayed.',
               ),
             ),
           ),
@@ -43,7 +52,7 @@ class SettingsPage extends StatelessWidget {
               leading: Icon(Icons.fact_check),
               title: Text('Emergency review'),
               subtitle: Text(
-                'Escalation requires guardian authority, verification, and audit records.',
+                'Raw export requires guardian authority, verified emergency/legal workflow, encryption controls, and audit records.',
               ),
             ),
           ),

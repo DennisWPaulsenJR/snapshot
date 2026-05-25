@@ -350,3 +350,21 @@ checks run: dart format; flutter analyze; flutter test; flutter build web; tempo
 results: Analyzer passed, widget test passed, web build passed, local web server responded on localhost.
 risks: Snapshot persistence is in-memory only; sensor data is mock-only; no auth, backend, real permissions, or encrypted storage yet.
 next: Add local structured persistence and a QA/export view for snapshot data.
+
+---
+
+# Network identifier risk model
+
+The system materially reduces misuse risk while preserving emergency evidentiary value.
+
+Normal MVP behavior:
+- no raw MAC/BSSID/BLE identifiers in normal UI
+- no open search or lookup by identifier
+- store `idHash` for mock wireless observations/devices
+- model nullable `rawIdProtected` as internal-only protected data
+- never display `rawIdProtected`
+- keep normal snapshot retention short
+- require verified emergency/legal workflow before raw export
+- audit all emergency/export access
+
+Future real OS-permitted wireless identifiers must pass through salted hashing, protected local storage, retention, and audit controls before storage or display.
