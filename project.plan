@@ -1,0 +1,337 @@
+# project.plan
+
+## Project: Consent-Based Emergency Signal Network
+
+## Agent identities
+- gpt = ChatGPT project manager / architect / scope / review planning
+- cx = local Codex implementation / QA / commit support
+- mgpt = mobile ChatGPT planning / mobile review / field notes
+- mcx = mobile Codex implementation / mobile test support
+- Dennis = owner / product manager / final reviewer
+
+## Operating rule
+This file is the central coordination record for project scope, current phase, agent activity, build status, and next actions.
+All agents should read this file before work and update it after meaningful work.
+
+---
+
+# 1. Product scope
+
+Build a consent-based safety platform that can support:
+
+1. Mobile app emergency signal snapshot
+2. Voluntary emergency witness network
+3. BLE / IoT safety device discovery
+4. Guardian-authorized emergency case packages
+5. Optional cellular IoT fallback for future devices
+6. Law-enforcement / verified emergency escalation workflow
+7. Privacy, consent, anti-abuse, short retention, and immutable audit logging
+
+Core principle:
+
+> This platform does not provide open-ended covert tracking. It supports consent-based safety, guardian-authorized emergencies, and verified emergency discovery with auditability.
+
+---
+
+# 2. MVP scope
+
+## MVP 1: Local app foundation
+Build the first working version locally.
+
+Required:
+- App scaffold
+- Auth/account placeholder or local profile mode
+- Emergency mode screen
+- Signal snapshot model
+- Local encrypted or structured storage placeholder
+- BLE scan abstraction
+- Wi-Fi/network context abstraction
+- Location permission abstraction
+- Snapshot history screen
+- Export/debug view for QA
+- Clear permission and consent language
+
+## MVP 2: Signal snapshot
+A snapshot should eventually include:
+
+- timestamp
+- app device ID
+- GPS lat/lng/accuracy, when permission granted
+- BLE advertisements seen, where OS permits
+- Wi-Fi/current network info, where OS permits
+- nearby enrolled beacon IDs
+- phone/network metadata, where permitted
+- emergency_case_id, optional
+- retention_expiration timestamp
+
+Raw MAC storage should not be default. Prefer hashed identifiers unless explicitly in verified emergency/legal mode.
+
+## MVP 3: BLE / IoT bridge
+Prepare structure for:
+- registered BLE safety beacons
+- rotating beacon IDs
+- RSSI/proximity reading
+- emergency beacon matching
+- future wearable integration
+
+## MVP 4: Emergency case package
+Create data model and placeholder workflow for:
+
+- child/person profile
+- guardian profile
+- verified emergency state
+- known device identifiers
+- known BLE/wearable IDs
+- known home-network identifiers
+- last known snapshots
+- audit log
+
+---
+
+# 3. Out of scope for early MVP
+
+Do not build yet:
+- real law-enforcement portal
+- real AMBER integration
+- real cellular carrier brokerage
+- ingestible/emission device implementation
+- covert tracking
+- bypassing OS privacy restrictions
+- unauthorized MAC tracking
+- raw identifier sharing without emergency/legal controls
+
+---
+
+# 4. Architecture direction
+
+Preferred early stack:
+- Mobile: Flutter
+- Backend later: Supabase or Firebase
+- Local first: build mock/local services before cloud dependency
+- Git: all work committed in small, reviewable increments
+- CI: add lint/test/build checks once scaffold is stable
+
+Suggested structure:
+
+```text
+/lib
+  /app
+    router.dart
+    app.dart
+  /core
+    /models
+    /services
+    /permissions
+    /storage
+    /security
+  /features
+    /emergency
+    /snapshots
+    /ble_scanner
+    /network_context
+    /guardian
+    /devices
+    /audit
+```
+
+# 5. Initial build tasks for cx
+
+## Task 1: Repo inspection
+Confirm repo root
+Confirm framework/language
+Confirm build command
+Confirm current git branch/status
+Report existing files and risks before changes
+
+## Task 2: Create project foundation
+
+If no app exists:
+
+Scaffold Flutter app or confirm existing app
+Add basic folder structure
+Add placeholder pages:
+- Home
+- Emergency Mode
+- Snapshot History
+- Devices
+- Settings / Consent
+
+## Task 3: Add core models
+
+Create models for:
+
+- SignalSnapshot
+- BleObservation
+- WifiObservation
+- LocationObservation
+- EmergencyCase
+- SafetyDevice
+- AuditEvent
+
+## Task 4: Add service abstractions
+
+Create interfaces/classes for:
+
+- SnapshotService
+- BleScanService
+- NetworkContextService
+- LocationService
+- RetentionService
+- AuditLogService
+
+Use mock implementations first.
+
+## Task 5: Add local snapshot flow
+Button: "Create Test Snapshot"
+Generate mock BLE/Wi-Fi/location data
+Save locally
+Show in Snapshot History
+Show retention expiration
+
+## Task 6: QA
+
+Run:
+
+- formatter
+- analyzer/linter
+- tests if present
+- build if practical
+
+Then report:
+
+- changed files
+- commands run
+- test results
+- risks
+- next recommended task
+
+# 6. Privacy and safety requirements
+
+Mandatory:
+
+- consent-first UX
+- clear permissions
+- no silent tracking
+- no open-ended person lookup
+- no stalking-enabling feature
+- short retention defaults
+- emergency escalation must be auditable
+- raw identifiers should be minimized, hashed, or protected
+- user/guardian authority must be verified before emergency use
+
+Default retention:
+
+- normal snapshots: 24-72 hours
+- opt-in family safety: up to 7 days
+- active verified emergency: preserve until case closes
+- legal hold: only through verified process
+
+# 7. Git workflow
+
+Before work:
+
+- git status
+- git branch
+
+During work:
+
+- small changes
+- no unrelated refactors
+- preserve existing working code
+- avoid destructive changes
+
+After work:
+
+- git status
+- git diff --check
+
+If available:
+
+- flutter analyze
+- flutter test
+- flutter build apk
+
+Commit format:
+
+```text
+<scope>: <short summary>
+```
+
+Examples:
+
+- snapshots: add local signal snapshot model
+- emergency: add emergency mode placeholder
+- ble: add mock BLE scan service
+
+# 8. Agent update format
+
+Each agent update should use this format:
+
+```text
+agent: cx
+date:
+branch:
+task:
+files changed:
+summary:
+checks run:
+results:
+risks:
+next:
+```
+
+For GPT planning updates:
+
+```text
+agent: gpt
+date:
+scope decision:
+reason:
+instructions for cx:
+review checklist:
+```
+
+For mobile GPT:
+
+```text
+agent: mgpt
+date:
+observation:
+mobile test notes:
+recommended action:
+```
+
+For mobile Codex:
+
+```text
+agent: mcx
+date:
+task:
+mobile environment:
+changes/tests:
+results:
+next:
+```
+
+# 9. Current phase
+
+Phase: MVP foundation
+
+Immediate objective:
+Build a local-first mobile app foundation with mock signal snapshot creation, local snapshot history, BLE/Wi-Fi/location abstraction layers, and privacy-first emergency architecture.
+
+# 10. First instruction to cx
+
+cx should begin with repo inspection, then implement the MVP foundation only if the repo state is clean enough.
+
+cx must not implement real covert tracking, raw MAC exfiltration, law-enforcement access, carrier integration, or ingestible-device logic.
+
+cx should build the safe foundation:
+
+- local mock snapshots
+- BLE/network/location abstractions
+- consent/permissions UI
+- emergency case placeholder
+- audit/retention model
+
+After implementation, cx should run available checks and report using the agent update format above.
