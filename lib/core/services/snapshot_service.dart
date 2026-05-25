@@ -128,7 +128,19 @@ class LocalSnapshotService implements SnapshotService {
   Future<List<Map<String, Object?>>> exportPrivacySafeSnapshots() async {
     await _ensureLoaded();
     await deleteExpiredSnapshots();
-    return _exportService.exportSnapshots(_snapshots);
+    final export = _exportService.exportSnapshots(_snapshots);
+    final now = DateTime.now();
+    await _auditLogService.record(
+      AuditEvent(
+        id: 'audit_export_preview_${now.microsecondsSinceEpoch}',
+        type: AuditEventType.exportPreviewGenerated,
+        timestamp: now,
+        actor: 'local_debug_user',
+        summary: 'Generated privacy-safe export preview',
+        metadata: {'snapshotCount': export.length},
+      ),
+    );
+    return export;
   }
 
   Future<void> _ensureLoaded() async {

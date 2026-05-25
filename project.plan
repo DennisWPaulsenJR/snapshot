@@ -381,3 +381,16 @@ checks run: dart format; flutter analyze; flutter test; flutter build web
 results: Analyzer passed, 4 tests passed, web build passed.
 risks: Persistence is MVP metadata storage, not encrypted production storage; rawIdProtected is still mock protected text, not real cryptography; no emergency raw export unlock flow yet.
 next: Add explicit encrypted-storage boundary design and audit-backed protected export authorization workflow when moving beyond MVP mocks.
+
+---
+
+agent: cdx
+date: 2026-05-24
+branch: main
+task: Audit-backed protected export authorization architecture
+files changed: lib/core/models/audit_event.dart, lib/core/models/protected_export.dart, lib/core/services/protected_export_service.dart, lib/core/services/snapshot_service.dart, lib/app, lib/features/protected_export, lib/features/shared, tests
+summary: Added mock protected export governance models and service with pending/approved/denied/expired/revoked states, authorization concepts, audit records, approval timeout handling, protected export rejection, and a developer review page. Privacy-safe export preview now emits audit events while protected/raw export remains explicitly unimplemented in MVP.
+checks run: dart format; flutter analyze; flutter test; flutter build web
+results: Analyzer passed, 10 tests passed, web build passed.
+risks: This is local mock governance only; no real identity verification, legal workflow, backend audit immutability, production cryptography, or raw export capability is implemented.
+next: Add immutable local audit persistence and richer emergency case linkage before considering any real sensor or protected export work.

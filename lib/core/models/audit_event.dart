@@ -4,6 +4,13 @@ enum AuditEventType {
   emergencyCaseUpdated,
   deviceRegistered,
   retentionApplied,
+  exportRequestCreated,
+  exportRequestApproved,
+  exportRequestDenied,
+  exportRequestExpired,
+  exportRequestRevoked,
+  exportPreviewGenerated,
+  unauthorizedProtectedExportRejected,
 }
 
 class AuditEvent {

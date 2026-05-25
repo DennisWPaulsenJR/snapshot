@@ -27,6 +27,7 @@ class AppScaffold extends StatelessWidget {
             1 => AppRoutes.emergency,
             2 => AppRoutes.snapshots,
             3 => AppRoutes.devices,
+            4 => AppRoutes.protectedExport,
             _ => AppRoutes.settings,
           };
           if (ModalRoute.of(context)?.settings.name != route) {
@@ -41,6 +42,7 @@ class AppScaffold extends StatelessWidget {
           ),
           NavigationDestination(icon: Icon(Icons.history), label: 'History'),
           NavigationDestination(icon: Icon(Icons.sensors), label: 'Devices'),
+          NavigationDestination(icon: Icon(Icons.policy), label: 'Review'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
