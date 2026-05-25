@@ -368,3 +368,16 @@ Normal MVP behavior:
 - audit all emergency/export access
 
 Future real OS-permitted wireless identifiers must pass through salted hashing, protected local storage, retention, and audit controls before storage or display.
+
+---
+
+agent: cdx
+date: 2026-05-24
+branch: main
+task: Local structured persistence and export boundary proof
+files changed: lib/core/models, lib/core/storage, lib/core/export, lib/core/services/snapshot_service.dart, lib/app/app.dart, lib/features/snapshots, pubspec files, tests
+summary: Added shared_preferences-backed structured snapshot persistence, storage serialization/deserialization, retention cleanup on startup/list/export, clear-all and purge-expired debug actions, and a privacy-safe export preview that shows idHash while excluding rawIdProtected.
+checks run: dart format; flutter analyze; flutter test; flutter build web
+results: Analyzer passed, 4 tests passed, web build passed.
+risks: Persistence is MVP metadata storage, not encrypted production storage; rawIdProtected is still mock protected text, not real cryptography; no emergency raw export unlock flow yet.
+next: Add explicit encrypted-storage boundary design and audit-backed protected export authorization workflow when moving beyond MVP mocks.

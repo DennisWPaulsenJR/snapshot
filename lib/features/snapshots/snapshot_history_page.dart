@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../app/app.dart';
@@ -12,18 +14,51 @@ class SnapshotHistoryPage extends StatefulWidget {
 }
 
 class _SnapshotHistoryPageState extends State<SnapshotHistoryPage> {
-  late Future<List<SignalSnapshot>> _snapshots;
+  late Future<_SnapshotHistoryState> _state;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _snapshots = SnapshotScope.snapshotsOf(context).listSnapshots();
+    _state = _loadState();
+  }
+
+  Future<_SnapshotHistoryState> _loadState() async {
+    final service = SnapshotScope.snapshotsOf(context);
+    final snapshots = await service.listSnapshots();
+    final export = await service.exportPrivacySafeSnapshots();
+    return _SnapshotHistoryState(snapshots: snapshots, export: export);
   }
 
   Future<void> _refresh() async {
     setState(() {
-      _snapshots = SnapshotScope.snapshotsOf(context).listSnapshots();
+      _state = _loadState();
     });
+  }
+
+  Future<void> _deleteExpired() async {
+    final deleted = await SnapshotScope.snapshotsOf(
+      context,
+    ).deleteExpiredSnapshots();
+    if (!mounted) {
+      return;
+    }
+    await _refresh();
+    _showMessage('Deleted $deleted expired snapshots');
+  }
+
+  Future<void> _clearAll() async {
+    await SnapshotScope.snapshotsOf(context).clearSnapshots();
+    if (!mounted) {
+      return;
+    }
+    await _refresh();
+    _showMessage('Cleared local snapshot history');
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -31,34 +66,120 @@ class _SnapshotHistoryPageState extends State<SnapshotHistoryPage> {
     return AppScaffold(
       title: 'Snapshot History',
       currentIndex: 2,
-      child: FutureBuilder<List<SignalSnapshot>>(
-        future: _snapshots,
+      child: FutureBuilder<_SnapshotHistoryState>(
+        future: _state,
         builder: (context, snapshot) {
-          final snapshots = snapshot.data ?? const <SignalSnapshot>[];
-          if (snapshots.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'No local snapshots yet. Use Create Test Snapshot on Home to generate mock QA data.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
+          final state = snapshot.data ?? const _SnapshotHistoryState.empty();
+          final snapshots = state.snapshots;
 
           return RefreshIndicator(
             onRefresh: _refresh,
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: snapshots.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return _SnapshotCard(snapshot: snapshots[index]);
-              },
+              children: [
+                _HistoryActions(
+                  onDeleteExpired: _deleteExpired,
+                  onClearAll: _clearAll,
+                ),
+                const SizedBox(height: 12),
+                _PrivacySafeExportPreview(export: state.export),
+                const SizedBox(height: 12),
+                if (snapshots.isEmpty)
+                  const _EmptyHistory()
+                else
+                  for (final snapshot in snapshots) ...[
+                    _SnapshotCard(snapshot: snapshot),
+                    const SizedBox(height: 12),
+                  ],
+              ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _SnapshotHistoryState {
+  const _SnapshotHistoryState({required this.snapshots, required this.export});
+
+  const _SnapshotHistoryState.empty() : snapshots = const [], export = const [];
+
+  final List<SignalSnapshot> snapshots;
+  final List<Map<String, Object?>> export;
+}
+
+class _HistoryActions extends StatelessWidget {
+  const _HistoryActions({
+    required this.onDeleteExpired,
+    required this.onClearAll,
+  });
+
+  final VoidCallback onDeleteExpired;
+  final VoidCallback onClearAll;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        OutlinedButton.icon(
+          onPressed: onDeleteExpired,
+          icon: const Icon(Icons.auto_delete),
+          label: const Text('Purge Expired'),
+        ),
+        OutlinedButton.icon(
+          onPressed: onClearAll,
+          icon: const Icon(Icons.delete_outline),
+          label: const Text('Clear All Debug'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PrivacySafeExportPreview extends StatelessWidget {
+  const _PrivacySafeExportPreview({required this.export});
+
+  final List<Map<String, Object?>> export;
+
+  @override
+  Widget build(BuildContext context) {
+    final prettyJson = const JsonEncoder.withIndent('  ').convert(export);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Privacy-safe export preview',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Normal exports include idHash values and exclude rawIdProtected fields.',
+            ),
+            const SizedBox(height: 12),
+            SelectableText(prettyJson),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyHistory extends StatelessWidget {
+  const _EmptyHistory();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Text(
+        'No local snapshots yet. Use Create Test Snapshot on Home to generate mock QA data.',
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -73,6 +194,9 @@ class _SnapshotCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = snapshot.locationObservation;
     final wifi = snapshot.wifiObservation;
+    final timeRemaining = snapshot.retentionExpiresAt.difference(
+      DateTime.now(),
+    );
 
     return Card(
       child: Padding(
@@ -84,6 +208,7 @@ class _SnapshotCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text('Created: ${snapshot.createdAt.toLocal()}'),
             Text('Retention expires: ${snapshot.retentionExpiresAt.toLocal()}'),
+            Text('Retention remaining: ${_formatDuration(timeRemaining)}'),
             Text('BLE observations: ${snapshot.bleObservations.length}'),
             if (wifi != null) Text('Wi-Fi context hash: ${wifi.idHash}'),
             if (location != null)
@@ -94,5 +219,14 @@ class _SnapshotCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    if (duration.isNegative) {
+      return 'expired';
+    }
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    return '${hours}h ${minutes}m';
   }
 }

@@ -1,9 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapshot/app/app.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('home page creates a local mock snapshot', (tester) async {
     await tester.pumpWidget(const SnapshotApp());
+    await tester.pumpAndSettle();
 
     expect(find.text('Create Test Snapshot'), findsOneWidget);
     expect(find.text('View Snapshot History'), findsOneWidget);
